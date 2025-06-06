@@ -1,0 +1,16 @@
+Package: CondTimeROC
+Type: Package
+Title: Estimation of Covariate-Specific Time-Dependent ROC Curves
+Version: 1.0-1
+Date: 2025-06-05
+Authors@R: c(person(given = "Maria Xose", family = "Rodriguez-Alvarez",
+              email = "mxrodriguez@uvigo.gal", role = c("aut","cre")),
+           person(given = "Vanda", family = "Inacio",
+              email = "Vanda.Inacio@ed.ac.uk", role = "aut"),   
+           person(given = "Luis", family = "Meira Machado",
+              email = "lmachado@math.uminho.pt", role = "aut"),
+           person(give = "Artur", family = "Araujo (C code)", role = "ctb"))
+Depends: survival, KernSmooth, np, mgcv, pammtools
+Description: Nonparametric and semiparametric estimation of the cumulative/dynamic time-dependent ROC curve in the presence of covariates. Based on Rodriguez-Alvarez and Inacio (2025) and Rodriguez-Alvarez et al. (2016) <doi: 10.1002/sim.6769>. It also implements the proposal described in Song and Zhou (2008) <doi:10.1111/biom.12312>.
+License: GPL
+LazyLoad: yes

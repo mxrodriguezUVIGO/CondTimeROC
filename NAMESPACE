@@ -1,0 +1,8 @@
+useDynLib(CondTimeROC, .registration = TRUE)
+importFrom("stats", "approxfun", "as.formula", "lm", "na.omit", "nobs", "predict", "terms.formula", "dnorm", "quantile", "sd", "update.formula", "poisson")
+import(survival)
+import(KernSmooth)
+import(np)
+import(mgcv)
+import(pammtools)
+export(ctimeROC.sp, ctimeROC.np, ctimeROC.ps)
