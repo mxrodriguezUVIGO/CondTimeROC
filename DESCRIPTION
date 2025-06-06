@@ -11,6 +11,6 @@ Authors@R: c(person(given = "Maria Xose", family = "Rodriguez-Alvarez",
               email = "lmachado@math.uminho.pt", role = "aut"),
            person(give = "Artur", family = "Araujo (C code)", role = "ctb"))
 Depends: survival, KernSmooth, np, mgcv, pammtools
-Description: Nonparametric and semiparametric estimation of the cumulative/dynamic time-dependent ROC curve in the presence of covariates. Based on Rodriguez-Alvarez and Inacio (2025) and Rodriguez-Alvarez et al. (2016) <doi: 10.1002/sim.6769>. It also implements the proposal described in Song and Zhou (2008) <doi:10.1111/biom.12312>.
+Description: Nonparametric and semiparametric estimation of the cumulative/dynamic time-dependent ROC curve in the presence of covariates. Based on Rodriguez-Alvarez and Inacio (2025) and Rodriguez-Alvarez et al. (2016) <doi: 10.1002/sim.6769>. It also implements the proposal described in Song and Zhou (2008) <https://www3.stat.sinica.edu.tw/statistica/oldpdf/A18n37.pdf>.
 License: GPL
 LazyLoad: yes
