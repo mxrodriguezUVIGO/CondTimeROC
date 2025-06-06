@@ -3,7 +3,7 @@
 
 ## Installation
 ``` r
-From GitHub:
+# From GitHub:
 # install.packages("devtools")
 devtools::install_github("mxrodriguezUVIGO/CondTimeROC")
 ```
