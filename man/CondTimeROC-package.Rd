@@ -19,7 +19,7 @@ Maintainer: \packageMaintainer{CondTimeROC}
 }
 \references{
 
-M.X Rodriguez-Alvarez and V. Inacio (2025). Penalised spline estimation of covariate-specific time-dependent ROC curves. Technical Report
+M.X Rodriguez-Alvarez and V. Inacio (2025). Penalised spline estimation of covariate-specific time-dependent ROC curves. ArXiv preprint (https://arxiv.org/abs/2506.13604)
 
 M.X Rodriguez-Alvarez, L. Meira-Machado, E. Abu-Assi and S. Raposeiras-Roubin (2016). Nonparametric estimation of time-dependent ROC curves conditional on a continuous covariate. \emph{Statistics in Medicine} \bold{35}, 1090--1102.
 

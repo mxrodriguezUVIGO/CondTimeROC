@@ -37,7 +37,7 @@ Returns a list with the following components:
 \references{
 G. Marra and S.N. Wood (2011). Practical variable selection for generalized additive models. \emph{Computational Statistics and Data Analysis}, \bold{55}, 2372-2387.
 
-M.X. Rodriguez-Alvarez and V. Inacio (2025). Penalised spline estimation of covariate-specific time-dependent ROC curves. Technical Report
+M.X. Rodriguez-Alvarez and V. Inacio (2025). Penalised spline estimation of covariate-specific time-dependent ROC curves. ArXiv preprint (https://arxiv.org/abs/2506.13604)
 }
 \author{
 Maria Xose Rodriguez-Alvarez and Vanda Inacio
