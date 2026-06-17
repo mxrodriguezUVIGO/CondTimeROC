@@ -32,6 +32,11 @@ function(formula.coxph, formula.lm, data, cutoffs = NULL, predict.time, cov.valu
 	#cov.names <- unique(c(terms.lm, terms.coxph))
 	#cov.names <- cov.names[!(cov.names %in% marker)]
 
+	if (inherits(data, what = 'data.frame')) {
+        data <- as.data.frame(data)
+    } else {
+        stop("The object specified in argument 'data' is not a data frame")
+    }
 	# Check that all variables are in the data
 	if(sum(is.na(match(all_vars, names(data))))) {
         stop("Not all needed variables are supplied in data")
@@ -42,13 +47,19 @@ function(formula.coxph, formula.lm, data, cutoffs = NULL, predict.time, cov.valu
         stop("Not all needed variables are supplied in cov.values")
     }
 
+    data.new <- data[,all_vars]
+    omit <- apply(data.new, 1, anyNA)
+
 	# Delete NAs
-	data <- data[,all_vars]
-	data <- na.omit(data)
+    data.new <- data.new[!omit,,drop = FALSE]
+
+	# Delete NAs
+	# data <- data[,all_vars]
+	# data <- na.omit(data)
 
 	# The cutoffs to compute the ROC curve	
 	if(is.null(cutoffs)) {
-		cutoffs <- sort(unique(data[,marker]))
+		cutoffs <- sort(unique(data.new[,marker]))
 	}
 	
 	# Now is a data.frame (new version)
@@ -60,14 +71,14 @@ function(formula.coxph, formula.lm, data, cutoffs = NULL, predict.time, cov.valu
 	TPR <- FPR <- matrix(ncol = nrow(cov.values), nrow = length(cutoffs))
 	 
 	# Fit the coxph model	
-	fit.coxph <- coxph(formula.coxph, data = data)
+	fit.coxph <- coxph(formula.coxph, data = data.new)
 	
 	# Fit linear regression model
-	fit.lm <- lm(formula.lm, data = data)
+	fit.lm <- lm(formula.lm, data = data.new)
 	residuals <- fit.lm$model[,marker] - fit.lm$fitted
 	
 	# Obtain the log of the cumulative baseline hazard function
-	#sfit <- survfit(fit.coxph, newdata = data)
+	#sfit <- survfit(fit.coxph, newdata = data.new)
 	sfit <- survfit(fit.coxph)
 	h <- log(-log(sfit$surv))
 	h_time <- approxfun(sfit$time, h, yleft = min(h), yright = max(h))(predict.time) # log(Delta_0(predict.time))
@@ -114,6 +125,21 @@ function(formula.coxph, formula.lm, data, cutoffs = NULL, predict.time, cov.valu
 		area[i] <- obtain.ROCCurve(seq(0,1, l = 101), rev(FPR[,i]), rev(TPR[,i]))$AUC
 	}
 	
-	res <- list(cutoffs = c(-Inf, cutoffs, Inf), TPR = TPR, FPR = FPR, AUC = area)
+	res <- list()
+	res$call 			<- match.call()
+	res$data 			<- data
+	res$missing.ind 	<- omit
+    res$marker 			<- marker
+    res$covariates		<- all_cov
+    res$time			<- time_var
+    res$status			<- delta_var
+	res$cutoffs 		<- c(-Inf, cutoffs, Inf)
+	res$predict.time 	<- predict.time
+	res$cov.values		<- cov.values
+	res$TPR 			<- TPR
+	res$FPR 			<- FPR
+	res$AUC 			<- area
+	res$fitted.models 	<- list(hazard = fit.coxph, biomarker = fit.lm)
+	class(res) <- c("ctimeROC.sp", "ctimeROC")
 	res
 }

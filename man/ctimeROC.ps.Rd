@@ -28,7 +28,10 @@ ctimeROC.ps(formula.hazard, formula.biomarker, data, cutoffs = NULL,
 %}
 \value{
 Returns a list with the following components:
-\item{cutoffs}{Vector with the cutoffs at which the True Positive Rates and the False Positive Rates have been computed}
+\item{call}{The matched call.}
+\item{cutoffs}{Vector with the cutoffs at which the True Positive Rates and the False Positive Rates have been computed.}
+\item{predict.time}{Time-point at which the conditional time-dependent True Positive and the False Positive Rates have been computed.}
+\item{cov.values}{Data.frame with the covariates values at which the conditional time-dependent True Positive and the False Positive Rates have been computed.}
 \item{TPR}{Matrix with as many columns as covariate values and as many rows as cutoffs with the estimated True Positive Rates.}
 \item{FPR}{Matrix with as many columns as covariate values and as many rows as cutoffs with the estimated False Positive Rates.}
 \item{AUC}{Vector with the estimated time-dependent AUC at each covariate value.}
@@ -49,8 +52,9 @@ Maria Xose Rodriguez-Alvarez and Vanda Inacio
 \code{\link{ctimeROC.sp}}, \code{\link{ctimeROC.np}}
 }
 \examples{
-	set.seed(123)
+	library(CondTimeROC)
 	# Simulate the data
+	set.seed(123)
 	# Sample size
 	n <- 600
 	# Covariate
@@ -77,12 +81,19 @@ Maria Xose Rodriguez-Alvarez and Vanda Inacio
 		predict.time = 1,
 		cov.values = data.frame(x = 0))
 	
+	summary(croc.ps)
+	
+	# AUC
 	croc.ps$AUC
 	
-	# Plot the ROC curve
+	# Plot the ROC curve manually
 	plot(croc.ps$FPR, croc.ps$TPR, xlab = "FPR", 
 		ylab = "TPR", type = "l", lwd = 2)
 	abline(0, 1, col = "grey")
+
+	# Plot the ROC curve using the provided plot method
+  plot(croc.ps)
+
 	}
 	\dontshow{
 	croc.ps <- ctimeROC.ps(formula.hazard = "Surv(t, delta) ~ y + x + t", 
@@ -91,12 +102,20 @@ Maria Xose Rodriguez-Alvarez and Vanda Inacio
 		cov.values = data.frame(x = 0), 
 		cutoffs = seq(-3, 5, l = 200))
 	
+	summary(croc.ps)
+
+	# AUC
 	croc.ps$AUC
 	
-	# Plot the ROC curve
+	# Plot the ROC curve manually
 	plot(croc.ps$FPR, croc.ps$TPR, xlab = "FPR", 
 		ylab = "TPR", type = "l", lwd = 2)
-	abline(0,1,col = "grey")}
+	abline(0,1,col = "grey")
+
+	# Plot the ROC curve using the provided plot method
+  plot(croc.ps)
+  
+	}
 
 	# Using the previous results, we now obtain the ROC curve
 	# for a different time
@@ -109,7 +128,7 @@ Maria Xose Rodriguez-Alvarez and Vanda Inacio
 
 	croc.ps.t2$AUC
 	
-	# Plot the ROC curve
+	# Plot the ROC curve manually
 	plot(croc.ps.t2$FPR, croc.ps.t2$TPR, xlab = "FPR", 
 		ylab = "TPR", type = "l", lwd = 2)
 	abline(0,1,col = "grey")

@@ -90,6 +90,11 @@ ctimeROC.ps <- function(formula.hazard, formula.biomarker, data,
 		all_vars <- unique(c(marker, time_var, delta_var, vars_mean, vars_variance, vars_hazard))
 		all_cov  <- all_vars[!(all_vars %in% c(marker, time_var, delta_var))]
 
+	if (inherits(data, what = 'data.frame')) {
+        data <- as.data.frame(data)
+    } else {
+        stop("The object specified in argument 'data' is not a data frame")
+    }
 	# Check that all variables are in the data
 	if(sum(is.na(match(all_vars, names(data))))) {
         stop("Not all needed variables are supplied in data")
@@ -100,9 +105,15 @@ ctimeROC.ps <- function(formula.hazard, formula.biomarker, data,
         stop("Not all needed variables are supplied in cov.values")
     }
 
+    data.new <- data[,all_vars]
+    omit <- apply(data.new, 1, anyNA)
+
 	# Delete NAs
-	data <- data[,all_vars]
-	data <- na.omit(data)	
+    data.new <- data.new[!omit,,drop = FALSE]
+
+	# Delete NAs
+	# data <- data[,all_vars]
+	# data <- na.omit(data)	
 	
 	# Surv for pamm
 	vars_hazard_wo_time <- vars_hazard[!(vars_hazard %in% time_var)]  	
@@ -111,7 +122,7 @@ ctimeROC.ps <- function(formula.hazard, formula.biomarker, data,
 
 	# The cutoffs to compute the ROC curve	
 	if(is.null(cutoffs)) {
-		cutoffs <- sort(unique(data[,marker]))
+		cutoffs <- sort(unique(data.new[,marker]))
 	}
 
 	# TPR and FPR (we assume that only a time is considered)
@@ -119,17 +130,17 @@ ctimeROC.ps <- function(formula.hazard, formula.biomarker, data,
 	
 	if(is.null(fitted.models)) {
 		# Hazard model
-		if(sum(data[[delta_var]] == 0)) {
-			max.time <- max(unique(c(data[[time_var]][data[[delta_var]] == 1], max(data[[time_var]][data[[delta_var]] == 0]))))
+		if(sum(data.new[[delta_var]] == 0)) {
+			max.time <- max(unique(c(data.new[[time_var]][data.new[[delta_var]] == 1], max(data.new[[time_var]][data.new[[delta_var]] == 0]))))
 		} else {
-			max.time <- max(unique(c(data[[time_var]][data[[delta_var]] == 1])))
+			max.time <- max(unique(c(data.new[[time_var]][data.new[[delta_var]] == 1])))
 		}		
 
 		# Obtain the augmented data using package pammtools 
 		if(is.null(n.timepoints)) {
-			ped_data <- data %>% as_ped(formula.surv, max_time = max.time)
+			ped_data <- data.new %>% as_ped(formula.surv, max_time = max.time)
 		} else {
-			ped_data <- data %>% as_ped(formula.surv, cut = seq(0, max.time, length = n.timepoints))
+			ped_data <- data.new %>% as_ped(formula.surv, cut = seq(0, max.time, length = n.timepoints))
 		}
 		ped_data[,time_var] <- ped_data$tend
 		
@@ -143,7 +154,7 @@ ctimeROC.ps <- function(formula.hazard, formula.biomarker, data,
 				data = ped_data, family = poisson(link = "log"), offset = ped_data$offset, discrete = discrete, select = select)
 
 		# Location/scale model
-		fit.biomarker <- loc_scale_model_mgcv(formula.biomarker, data = data)
+		fit.biomarker <- loc_scale_model_mgcv(formula.biomarker, data = data.new)
 	} else {
 		fit.hazard <- fitted.models$hazard
 		fit.biomarker   <- fitted.models$biomarker
@@ -178,6 +189,7 @@ ctimeROC.ps <- function(formula.hazard, formula.biomarker, data,
 	}, fit = fit.hazard, data = cov.values, data.roc = p.roc, predict.time = predict.time))
 
 	den.fpr <- apply(p.coxph, 2, sum)
+	den.fpr[den.fpr == 0] <- 2e-300
 	den.tpr <- length(residuals) - den.fpr
 	
 	num.fpr <- matrix(c(sapply(1:length(cutoffs), function(i){
@@ -196,9 +208,21 @@ ctimeROC.ps <- function(formula.hazard, formula.biomarker, data,
 			obtain.ROCCurve(fpr.seq, rev(FPR[,x]), rev(TPR[,x]))$AUC
 		}, fpr.seq = seq(0,1, l = 101), FPR = FPR, TPR = TPR)
 
-	res <- list(cutoffs = c(-Inf, cutoffs, Inf), 
-		TPR = TPR, 
-		FPR = FPR, 
-		AUC = area, 
-		fitted.models = list(hazard = fit.hazard, biomarker = fit.biomarker))
+	res <- list()
+	res$call 			<- match.call()
+	res$data 			<- data
+	res$missing.ind 	<- omit
+    res$marker 			<- marker
+    res$covariates		<- all_cov
+    res$time			<- time_var
+    res$status			<- delta_var
+	res$cutoffs 		<- c(-Inf, cutoffs, Inf)
+	res$predict.time 	<- predict.time
+	res$cov.values		<- cov.values
+	res$TPR 			<- TPR 
+	res$FPR 			<- FPR 
+	res$AUC 			<- area 
+	res$fitted.models 	<- list(hazard = fit.hazard, biomarker = fit.biomarker)
+	class(res) <- c("ctimeROC.ps", "ctimeROC")
+	res
 }

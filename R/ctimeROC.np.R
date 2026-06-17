@@ -1,24 +1,32 @@
 ctimeROC.np <-
 function(marker, covariate, time, status, data, cutoffs = NULL, predict.time, cov.value = NULL, smooth = c("nu","ns"), bwsel = c("ALbw","dpik","npbw", "NNE"), ipcw = c("Beran", "Akritas"), lbd.x = NULL, lbd.y = NULL, span = NULL, lambda = NULL, kernel = c("gaussian", "epanechnikov"), AUC.calc = c("numaprox","cexpr")) {
 	
-	smooth = match.arg(smooth)
-	bwsel = match.arg(bwsel)
-	kernel = match.arg(kernel)
-	ipcw = match.arg(ipcw)
-	AUC.calc = match.arg(AUC.calc)
+	smooth 		<- match.arg(smooth)
+	bwsel 		<- match.arg(bwsel)
+	kernel 		<- match.arg(kernel)
+	ipcw 		<- match.arg(ipcw)
+	AUC.calc 	<-  match.arg(AUC.calc)
 	
 	if ((bwsel == "NNE" || ipcw == "Akritas") & is.null(lambda) & is.null(span)) {
 		cat("NNE and/or Akritas requires either lambda or span! \n")
 		stop(0)
 	}
-	# Delete NAs
-	data <- data[ ,c(marker, covariate, time, status)]
-	data <- na.omit(data)
+	if (inherits(data, what = 'data.frame')) {
+        data <- as.data.frame(data)
+    } else {
+        stop("The object specified in argument 'data' is not a data frame")
+    }
 	
-	x <- data[,covariate]
-	y <- data[,marker]
-	ttilde <- data[,time]
-	status <- data[,status]	
+	data.new <- data[ ,c(marker, covariate, time, status)]
+    omit <- apply(data.new, 1, anyNA)
+
+	# Delete NAs
+    data.new <- data.new[!omit,,drop = FALSE]
+
+	x <- data.new[,covariate]
+	y <- data.new[,marker]
+	ttilde <- data.new[,time]
+	status <- data.new[,status]	
 	
 	n <- length(y)
 	
@@ -126,6 +134,25 @@ function(marker, covariate, time, status, data, cutoffs = NULL, predict.time, co
 		area <- obtain.ROCCurve(seq(0,1, l = 101), rev(FPR), rev(TPR))$AUC
 	}
 	
-	res <- list(cutoffs = c(-Inf, tc, Inf), TPR = TPR, FPR = FPR, AUC = area, lbd = c(ifelse(is.null(lbd.x), -1, lbd.x), ifelse(is.null(lbd.y), -1, lbd.y)))
+	res <- list()
+	res$call 			<- match.call()
+	res$data 			<- data
+	res$missing.ind 	<- omit
+    res$marker 			<- marker
+    res$covariates		<- covariate
+    res$time			<- time
+    res$status			<- status
+	res$cutoffs 		<- c(-Inf, tc, Inf)
+	res$predict.time 	<- predict.time
+	res$cov.values		<- cov.value
+	res$smooth 			<- smooth
+	res$bwsel 			<- bwsel
+	res$kernel 			<- kernel
+	res$ipcw 			<- ipcw
+	res$TPR 			<- TPR
+	res$FPR 			<- FPR
+	res$AUC 			<- area
+	res$lbd 			<- c(ifelse(is.null(lbd.x), -1, lbd.x), ifelse(is.null(lbd.y), -1, lbd.y))
+	class(res) 			<- c("ctimeROC.np", "ctimeROC")
 	res
 }

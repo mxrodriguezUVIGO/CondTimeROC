@@ -10,9 +10,9 @@ This function implements the semiparametric approach to the estimation of the co
 ctimeROC.sp(formula.coxph, formula.lm, data, cutoffs = NULL, predict.time, cov.values)
 }
 \arguments{
-  \item{formula.coxph}{Formula for the Cox model associated with the proposal by Song and Zhou (2008). It has to be of the form: "Surv(t, delta) ~ y + x", with x being the covariate and y the biomarker.}
-  \item{formula.lm}{Formula for the linear model associated with the proposal by Song and Zhou (2008). It has to be of the form: "y ~ x", with x being the covariate and y the biomarker.}
-  \item{data}{Data frame containing all needed variables (covariate, biomarker, survival time and censoring indicator)}
+  \item{formula.coxph}{Formula for the Cox model associated with the proposal by Song and Zhou (2008). It has to be of the form: "Surv(t, delta) ~ y + x", with x being the covariate(s) and y the biomarker.}
+  \item{formula.lm}{Formula for the linear model associated with the proposal by Song and Zhou (2008). It has to be of the form: "y ~ x", with x being the covariate(s) and y the biomarker.}
+  \item{data}{Data frame containing all needed variables (covariate(s), biomarker, survival time and censoring indicator)}
   \item{cutoffs}{Vector of cutoffs at which the conditional time-dependent True Positive and the False Positive Rates will be computed. If NULL, the cutoffs are the unique values of the marker in the sample.}
   \item{predict.time}{Time-point at which the conditional time-dependent True Positive and the False Positive Rates will be computed. In the current implementation, only one value is allowed.}
   \item{cov.values}{Data.frame with the covariates values at which the conditional time-dependent True Positive and the False Positive Rates will be computed.}
@@ -22,10 +22,14 @@ ctimeROC.sp(formula.coxph, formula.lm, data, cutoffs = NULL, predict.time, cov.v
 %}
 \value{
 Returns a list with the following components:
-\item{cutoffs}{Vector with the cutoffs at which the True Positive Rates and the False Positive Rates have been computed}
+\item{call}{The matched call.}
+\item{cutoffs}{Vector with the cutoffs at which the True Positive Rates and the False Positive Rates have been computed.}
+\item{predict.time}{Time-point at which the conditional time-dependent True Positive and the False Positive Rates have been computed.}
+\item{cov.values}{Data.frame with the covariates values at which the conditional time-dependent True Positive and the False Positive Rates have been computed.}
 \item{TPR}{Matrix with as many columns as covariate values and as many rows as cutoffs with the estimated True Positive Rates.}
 \item{FPR}{Matrix with as many columns as covariate values and as many rows as cutoffs with the estimated False Positive Rates.}
 \item{AUC}{Vector with the estimated time-dependent AUC at each covariate value.}
+\item{fitted.models}{Named list containing the fitted models for the conditional hazard function (hazard) and the biomarker (biomarker).}
 }
 \references{
 X. Song and X-H. Zhou (2008). A semiparametric approach for the covariate specific ROC curve with survival outcome. \emph{Statistica Sinica} \bold{18}, 947--965.
@@ -40,8 +44,9 @@ Maria Xose Rodriguez-Alvarez and Luis Filipe Meira-Machado
 \code{\link{ctimeROC.ps}}, \code{\link{ctimeROC.np}}
 }
 \examples{
-	set.seed(123)
+	library(CondTimeROC)
 	# Simulate the data
+	set.seed(123)
 	# Sample size
 	n <- 600
 	# Covariate
@@ -65,12 +70,18 @@ Maria Xose Rodriguez-Alvarez and Luis Filipe Meira-Machado
 		formula.lm = "y ~ x", data = data, predict.time = 1, 
 		cov.values = data.frame(x = 0), cutoffs = seq(-3,5, l = 200))
 	
+	summary(croc.sz)
+	
+	# AUC
 	croc.sz$AUC
 	
-	# Plot the ROC curve
+	# Plot the ROC curve manually
 	plot(croc.sz$FPR, croc.sz$TPR, xlab = "FPR", 
 		ylab = "TPR", type = "l", lwd = 2)
 	abline(0, 1, col = "grey")
+
+	# Plot the ROC curve using the provided plot method
+  plot(croc.sz)
 }
 %\keyword{ ~kwd1 }
 %\keyword{ ~kwd2 }

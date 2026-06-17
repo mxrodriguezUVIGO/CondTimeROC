@@ -37,7 +37,10 @@ ctimeROC.np(marker, covariate, time, status, data, cutoffs = NULL, predict.time,
 %}
 \value{
 Returns a list with the following components:
-\item{cutoffs}{Vector with the cutoffs at which the True Positive Rates and the False Positive Rates have been computed}
+\item{call}{The matched call.}
+\item{cutoffs}{Vector with the cutoffs at which the True Positive Rates and the False Positive Rates have been computed.}
+\item{predict.time}{Time-point at which the conditional time-dependent True Positive and the False Positive Rates have been computed.}
+\item{cov.values}{Covariate value at which the conditional time-dependent True Positive and the False Positive Rates have been computed}
 \item{TPR}{Vector with the estimated True Positive Rates.}
 \item{FPR}{Vector with the estimated False Positive Rates.}
 \item{AUC}{Estimated time-dependent AUC.}
@@ -59,6 +62,7 @@ S. J. Sheater and M. C. Jones (1991). A reliable data-based bandwidth selection 
 \author{
 Maria Xose Rodriguez-Alvarez and Luis Filipe Meira-Machado
 }
+
 %\note{
 %}
 
@@ -66,8 +70,9 @@ Maria Xose Rodriguez-Alvarez and Luis Filipe Meira-Machado
 \code{\link{ctimeROC.ps}}, \code{\link{ctimeROC.sp}}
 }
 \examples{
-	set.seed(123)
+	library(CondTimeROC)
 	# Simulate the data
+	set.seed(123)
 	# Sample size
 	n <- 600
 	# Covariate
@@ -93,12 +98,20 @@ Maria Xose Rodriguez-Alvarez and Luis Filipe Meira-Machado
 		predict.time = 1, cov.value = 0, smooth = "ns", 
 		bwsel = "npbw", AUC.calc = "cexpr")
 	
+	summary(croc.np)
+
+	# AUC
 	croc.np$AUC
 	
-	# Plot the ROC curve
+	# Plot the ROC curve manually
 	plot(croc.np$FPR, croc.np$TPR, xlab = "FPR", 
 		ylab = "TPR", type = "l", lwd = 2)
-	abline(0,1,col = "grey")}
+	abline(0,1,col = "grey")
+
+	# Plot the ROC curve using the provided plot method
+  plot(croc.np)
+
+}
 
 	\dontshow{
 	croc.np <- ctimeROC.np(marker = "y", covariate = "x", time = "t", 
@@ -106,12 +119,18 @@ Maria Xose Rodriguez-Alvarez and Luis Filipe Meira-Machado
 		predict.time = 1, cov.value = 0, 
 		bwsel = "dpik", AUC.calc = "cexpr")
 	
+	summary(croc.np)
+
+	# AUC
 	croc.np$AUC
 	
-	# Plot the ROC curve
+	# Plot the ROC curve manually
 	plot(croc.np$FPR, croc.np$TPR, xlab = "FPR", 
 		ylab = "TPR", type = "l", lwd = 2)
-	abline(0,1,col = "grey")}
+	abline(0,1,col = "grey")
+
+	# Plot the ROC curve using the provided plot method
+  plot(croc.np)}
 }
 %\keyword{ ~kwd1 }
 %\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
